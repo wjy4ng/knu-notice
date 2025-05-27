@@ -60,7 +60,7 @@ const CATEGORIES = [
 async function fetchNoticeCount(board) {
   try {
     // 로컬 proxy.js 서버 URL로 변경
-    const proxyUrl = `http://localhost:3001/proxy?url=${encodeURIComponent(board.url)}`;
+    const proxyUrl = `/proxy?url=${encodeURIComponent(board.url)}`;
 
     const res = await fetch(proxyUrl);
     const html = await res.text();
@@ -187,7 +187,7 @@ document.addEventListener('mouseover', async (event) => {
     previewArea.style.top = `${mouseY + offsetY}px`;
 
     try {
-      const proxyUrl = `http://localhost:3001/proxy?url=${encodeURIComponent(boardUrl)}`;
+      const proxyUrl = `/proxy?url=${encodeURIComponent(boardUrl)}`;
       const res = await fetch(proxyUrl);
       const html = await res.text();
       const parser = new DOMParser();
