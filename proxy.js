@@ -1,6 +1,10 @@
 const express = require('express');
+const path = require('path'); // path 모듈 불러오기
 // const fetch = require('node-fetch'); // Node.js 18 이상은 내장 fetch 사용
 const app = express();
+
+// 정적 파일을 제공하는 미들웨어 설정
+app.use(express.static(path.join(__dirname, '/')));
 
 app.get('/', async (req, res) => {
   const url = req.query.url;
