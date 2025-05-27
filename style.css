@@ -1,0 +1,249 @@
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #f5f6fa;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 800px;
+  margin: 20px auto 200px auto; /* 상단 20px, 하단 100px 마진 */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+  text-align: center;
+}
+#notice-link {
+  display: inline-block;
+  margin-top: 24px;
+  font-size: 1.5rem;
+  color: #fff;
+  background: #2d8cf0;
+  padding: 12px 32px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+#notice-link:hover {
+  background: #1a73e8;
+}
+#notice-count {
+  font-weight: bold;
+  font-size: 2rem;
+  margin-left: 8px;
+}
+.notice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f0f4ff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  color: #222;
+}
+.notice-item:hover {
+  background: #dbeafe;
+}
+.notice-title {
+  font-weight: 500;
+}
+.notice-count {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #2d8cf0;
+}
+.header-with-logo {
+  display: flex; /* 로고와 제목을 가로로 배치 */
+  align-items: center; /* 세로 중앙 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  margin-bottom: 30px; /* 리스트와의 간격 */
+  position: relative; /* ::before 의사 요소를 위한 기준점 */
+
+  /* 배경 워터마크 스타일은 ::before 의사 요소로 이동 */
+  background-image: none; /* 기존 배경 이미지 삭제 */
+  opacity: 1; /* 기존 투명도 삭제 */
+}
+
+.header-with-logo::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%; /* 부모(.header-with-logo) 너비에 맞춤 */
+  height: 100%; /* 부모(.header-with-logo) 높이에 맞춤 */
+  background-image: url('images/logo.png'); /* 로고 이미지 경로 */
+  background-repeat: no-repeat; /* 반복 없음 */
+  background-position: center center; /* 의사 요소 중앙에 배치 */
+  background-size: 120px; /* 배경 이미지 크기 (필요에 따라 조절) */
+  opacity: 0.15; /* 투명도 조절 */
+  transform: translate(-50%, -50%); /* 정중앙 정렬 */
+  z-index: 0; /* 다른 콘텐츠 아래에 배치하되 보이도록 z-index 조정 */
+  pointer-events: none; /* 워터마크 위 클릭 방지 */
+}
+
+h1 {
+  color: #222; /* 글자 색상 원래대로 */
+  /* border-bottom: 2px solid #222; */ /* 복고풍 디자인에서 사용 */
+  padding-bottom: 10px;
+  margin-bottom: 0; /* header-with-logo에 마진 적용 */
+  /* display: inline-block; */ /* flex 컨테이너 안에서는 필요 없음 */
+  /* vertical-align: middle; */ /* flex 컨테이너 안에서는 필요 없음 */
+  /* margin-left: 15px; */ /* 로고 삭제로 간격 필요 없음 */
+  position: relative; /* z-index를 워터마크보다 위로 올리기 위한 기준점 */
+  z-index: 1; /* 워터마크 위에 표시 */
+}
+
+.kmnu-logo {
+  height: 60px; /* 로고 높이 조정 */
+  width: auto; /* 비율 유지 */
+  vertical-align: middle; /* 세로 중앙 정렬 */
+}
+
+#notice-list {
+  display: flex; /* 카테고리 섹션들을 가로로 배치 */
+  gap: 20px; /* 카테고리 섹션 간의 간격 */
+}
+
+.category-section {
+  flex: 1; /* 사용 가능한 공간을 균등하게 분배 */
+  min-width: 150px; /* 각 섹션의 최소 너비 설정 (필요에 따라 조정) */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#preview-area {
+  position: fixed; /* 절대 위치 대신 고정 위치 사용 */
+  left: 50%;
+  top: 20px; /* 화면 상단에서 띄우기 */
+  width: 90%;
+  max-width: 300px; /* 미리보기 영역의 최대 너비 */
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+  display: none; /* 초기에는 숨김 */
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+#preview-area h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+#preview-area ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: disc inside; /* 글머리 기호 추가 */
+}
+
+#preview-area li {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 5px;
+  padding-left: 10px;
+  border-left: 2px solid #2d8cf0;
+}
+
+#preview-area li:last-child {
+  margin-bottom: 0;
+}
+
+.notice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f0f4ff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  color: #222;
+}
+.notice-item:hover {
+  background: #dbeafe;
+}
+.notice-title {
+  font-weight: 500;
+}
+.notice-count {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #2d8cf0;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 40px; /* 컨테이너 하단과의 간격 */
+  padding: 20px; /* 푸터 내부 여백 */
+  color: #777; /* 글자 색상 */
+  font-size: 0.9rem; /* 글자 크기 */
+  border-top: 1px solid #eee; /* 상단 구분선 */
+}
+
+#preview-area {
+  position: fixed; /* 절대 위치 대신 고정 위치 사용 */
+  left: 50%;
+  top: 20px; /* 화면 상단에서 띄우기 */
+  width: 90%;
+  max-width: 300px; /* 미리보기 영역의 최대 너비 */
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+  display: none; /* 초기에는 숨김 */
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+#preview-area h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+#preview-area ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: disc inside; /* 글머리 기호 추가 */
+}
+
+#preview-area li {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 5px;
+  padding-left: 10px;
+  border-left: 2px solid #2d8cf0;
+}
+
+#preview-area li:last-child {
+  margin-bottom: 0;
+} 
