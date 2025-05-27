@@ -6,7 +6,7 @@ const app = express();
 // 정적 파일을 제공하는 미들웨어 설정
 app.use(express.static(path.join(__dirname, '/')));
 
-app.get('/', async (req, res) => {
+app.get('/proxy', async (req, res) => {
   const url = req.query.url;
   if (!url) {
     res.set('Access-Control-Allow-Origin', '*');
