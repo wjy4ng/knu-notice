@@ -63,29 +63,12 @@ async function fetchNoticeCount(board) {
     const proxyUrl = `api/proxy?url=${encodeURIComponent(board.url)}`;
 
     const res = await fetch(proxyUrl);
-    const html = await res.text();
-    console.log(`==== ${board.name} HTML ====`);
-    console.log(html);
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const dateCells = doc.querySelectorAll('tr:not(.notice) td.td-date');
-    const now = new Date();
-    let count = 0;
+    // 서버리스 함수에서 파싱된 JSON 데이터를 받도록 변경
+    const data = await res.json();
+    console.log(`==== ${board.name} Data ====`);
+    console.log(data);
 
-    dateCells.forEach(cell => {
-      let dateStr = cell.textContent.trim();
-      dateStr = dateStr.replace(/\./g, '-');
-      const noticeDate = new Date(dateStr);
-      if (
-        noticeDate.getFullYear() === now.getFullYear() &&
-        noticeDate.getMonth() === now.getMonth() &&
-        noticeDate.getDate() === now.getDate()
-      ) {
-        count++;
-      }
-    });
-
-    return count; // 개수 반환
+    return data.count; // JSON 응답에서 개수 반환
   } catch (e) {
     return 0; // 에러 발생 시 0 반환
   }
@@ -188,8 +171,15 @@ document.addEventListener('mouseover', async (event) => {
 
     try {
       const proxyUrl = `api/proxy?url=${encodeURIComponent(boardUrl)}`;
+      // 미리보기 데이터도 서버에서 가져오도록 변경 (만약 미리보기도 서버에서 처리한다면)
+      // 현재는 클라이언트에서 HTML 파싱 로직이 남아있으므로 이 부분을 수정해야 함
+      // 미리보기 데이터 구조가 어떻게 될지에 따라 서버 코드를 추가 수정해야 함
+
+      // 현재는 공지 개수만 서버에서 가져오므로 미리보기는 그대로 둡니다.
+      // TODO: 미리보기 데이터도 서버에서 가져오도록 수정 필요
+
       const res = await fetch(proxyUrl);
-      const html = await res.text();
+      const html = await res.text(); // 이 부분은 이제 필요 없을 수 있습니다.
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
