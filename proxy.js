@@ -2,7 +2,7 @@ const express = require('express');
 // const fetch = require('node-fetch'); // Node.js 18 이상은 내장 fetch 사용
 const app = express();
 
-app.get('/proxy', async (req, res) => {
+app.get('/', async (req, res) => {
   const url = req.query.url;
   if (!url) {
     res.set('Access-Control-Allow-Origin', '*');
