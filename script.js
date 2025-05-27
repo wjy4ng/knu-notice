@@ -60,15 +60,32 @@ const CATEGORIES = [
 async function fetchNoticeCount(board) {
   try {
     // 로컬 proxy.js 서버 URL로 변경
-    const proxyUrl = `api/proxy?url=${encodeURIComponent(board.url)}`;
+    const proxyUrl = `http://localhost:3001/proxy?url=${encodeURIComponent(board.url)}`;
 
     const res = await fetch(proxyUrl);
-    // 서버리스 함수에서 파싱된 JSON 데이터를 받도록 변경
-    const data = await res.json();
-    console.log(`==== ${board.name} Data ====`);
-    console.log(data);
+    const html = await res.text();
+    console.log(`==== ${board.name} HTML ====`);
+    console.log(html);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const dateCells = doc.querySelectorAll('tr:not(.notice) td.td-date');
+    const now = new Date();
+    let count = 0;
 
-    return data.count; // JSON 응답에서 개수 반환
+    dateCells.forEach(cell => {
+      let dateStr = cell.textContent.trim();
+      dateStr = dateStr.replace(/\./g, '-');
+      const noticeDate = new Date(dateStr);
+      if (
+        noticeDate.getFullYear() === now.getFullYear() &&
+        noticeDate.getMonth() === now.getMonth() &&
+        noticeDate.getDate() === now.getDate()
+      ) {
+        count++;
+      }
+    });
+
+    return count; // 개수 반환
   } catch (e) {
     return 0; // 에러 발생 시 0 반환
   }
@@ -170,32 +187,47 @@ document.addEventListener('mouseover', async (event) => {
     previewArea.style.top = `${mouseY + offsetY}px`;
 
     try {
-      const proxyUrl = `api/proxy?url=${encodeURIComponent(boardUrl)}`;
-      // 미리보기 데이터도 서버에서 가져오도록 변경 (만약 미리보기도 서버에서 처리한다면)
-      // 현재는 클라이언트에서 HTML 파싱 로직이 남아있으므로 이 부분을 수정해야 함
-      // 미리보기 데이터 구조가 어떻게 될지에 따라 서버 코드를 추가 수정해야 함
-
-      // 현재는 공지 개수만 서버에서 가져오므로 미리보기는 그대로 둡니다.
-      // TODO: 미리보기 데이터도 서버에서 가져오도록 수정 필요
-
+      const proxyUrl = `http://localhost:3001/proxy?url=${encodeURIComponent(boardUrl)}`;
       const res = await fetch(proxyUrl);
-      const html = await res.text(); // 이 부분은 이제 필요 없을 수 있습니다.
+      const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      // 공지 제목을 파싱하는 셀렉터 (실제 웹 페이지 구조에 맞게 조정 필요)
-      const noticeTitles = doc.querySelectorAll('td a');
-      let previewContent = `<h3>${boardTitle}</h3><ul>`;
-      const maxPreviews = Math.min(noticeCount, 5); // 새 공지 개수와 5 중 작은 값만큼 미리보기
+      // 공지 목록을 파싱하고 오늘 날짜 공지만 필터링
+      const noticeRows = doc.querySelectorAll('tr:not(.notice)'); // 고정 공지 제외
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // 날짜만 비교하기 위해 시간을 초기화
 
-      if (noticeTitles.length === 0) {
-        previewContent += '<li>공지사항이 없습니다.</li>';
+      const todayNotices = [];
+
+      noticeRows.forEach(row => {
+        const dateCell = row.querySelector('.td-date');
+        const titleElement = row.querySelector('td a');
+
+        if (dateCell && titleElement) {
+          let dateStr = dateCell.textContent.trim();
+          // 날짜 형식을 yyyy-mm-dd로 변환하여 Date 객체 생성
+          dateStr = dateStr.replace(/\./g, '-');
+          const noticeDate = new Date(dateStr);
+
+          // 날짜만 비교
+          if (noticeDate.getFullYear() === today.getFullYear() &&
+              noticeDate.getMonth() === today.getMonth() &&
+              noticeDate.getDate() === today.getDate()) {
+            todayNotices.push({ title: titleElement.textContent.trim(), url: titleElement.href });
+          }
+        }
+      });
+
+      let previewContent = `<h3>${boardTitle}</h3><ul>`;
+      const maxPreviews = 5; // 오늘 공지 중 최대 5개만 표시
+
+      if (todayNotices.length === 0) {
+        previewContent += '<li>오늘 올라온 공지사항이 없습니다.</li>';
       } else {
-        for (let i = 0; i < Math.min(noticeTitles.length, maxPreviews); i++) {
-          const titleElement = noticeTitles[i];
-          const title = titleElement.textContent.trim();
-          // 필요하다면 링크도 포함: const link = titleElement.href;
-          previewContent += `<li>${title}</li>`;
+        for (let i = 0; i < Math.min(todayNotices.length, maxPreviews); i++) {
+          const notice = todayNotices[i];
+          previewContent += `<li>${notice.title}</li>`;
         }
       }
       previewContent += '</ul>';
