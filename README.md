@@ -6,6 +6,8 @@ cd web_programming
 
 # develop 브랜치 생성
 git checkout -b develop
+or
+git switch -C develop
 
 # 작업, 커밋
 git add .
