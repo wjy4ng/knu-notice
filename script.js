@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // 7일 전 날짜 계산
   const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 4);
   const sevenDaysAgoFormatted = formatDate(sevenDaysAgo);
 
   noticeDateInput.value = todayFormatted; // 기본값은 오늘 날짜
