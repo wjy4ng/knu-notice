@@ -55,6 +55,7 @@ const CATEGORIES = [
   },
 ];
 
+// 미리보기 기능 변수 선언
 const previewArea = document.getElementById('preview-area');
 let showPreviewTimer;
 let hidePreviewTimer;
@@ -67,14 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 오늘 날짜를 YYYY-MM-DD 형식으로 포맷
   const todayFormatted = formatDate(today);
   
-  // 7일 전 날짜 계산
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 4);
-  const sevenDaysAgoFormatted = formatDate(sevenDaysAgo);
+  // 날짜 필터
+  const pastDate = new Date();
+  pastDate.setDate(pastDate.getDate() - 4); // 최대 5일까지
+  const pastDateFormatted = formatDate(pastDate);
 
   noticeDateInput.value = todayFormatted; // 기본값은 오늘 날짜
   noticeDateInput.max = todayFormatted; // 최대 선택 가능 날짜를 오늘로 설정
-  noticeDateInput.min = sevenDaysAgoFormatted; // 최소 선택 가능 날짜를 7일 전으로 설정
+  noticeDateInput.min = pastDateFormatted; // 최소 선택 가능 날짜를 4일 전으로 설정
 
   renderNoticeList(todayFormatted); // 페이지 로드 시 기본값으로 오늘 공지사항 렌더링
 
@@ -83,23 +84,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/*
-
-미리보기 기능 구현
-1. 마우스 이벤트 리스너 추가
-2. 게시판에 가만히 냅두면 미리보기 띄우기
-3. 영역을 벗어나면 미리보기 숨기기
-
-*/
-// 각 게시판 항목에 마우스 이벤트 리스너 추가
+// 마우스가 게시판 목록으로 들어왔을 때
 document.addEventListener('mouseover', async (event) => {
   const target = event.target.closest('.notice-item');
-  if (!target) return; // .notice-item가 아니면 종료
+  if (!target) return; // 게시판 목록에 마우스 없으면 종료
 
   const boardUrl = target.href; // 게시판 URL 가져오기
   const boardTitle = target.querySelector('.notice-title').textContent; // 게시판 제목 가져오기
 
-  // 미리보기 창이 이미 열려있고, 같은 URL이라면 로딩하지 않고 종료
+  // 미리보기 창이 이미 열려있고 같은 URL이라면 로딩x
   if (previewArea.style.display !== 'none' && previewArea.dataset.url === boardUrl) {
     return;
   }
@@ -107,16 +100,16 @@ document.addEventListener('mouseover', async (event) => {
   // 기존 미리보기 숨김 타이머가 있다면 취소
   clearTimeout(hidePreviewTimer);
 
-  // 미리보기 표시 타이머 설정
+  // 미리보기 표시 타이머 설정 (마우스를 바로바로 움직이면 미리보기 로직이 꼬이는 문제 해결)
   showPreviewTimer = setTimeout(async () => {
-    // 새로운 미리보기 내용 로딩
+    // 미리보기 띄우기
     previewArea.innerHTML = `<h3>${boardTitle}</h3><p>로딩 중...</p>`;
-    previewArea.style.display = 'flex'; // 미리보기 영역 표시
-    previewArea.style.position = 'absolute'; // 위치 조정을 위해 absolute 설정
+    previewArea.style.display = 'flex';
+    previewArea.style.position = 'absolute';
     previewArea.dataset.url = boardUrl; // 현재 미리보기 중인 URL 저장
-    const noticeCount = parseInt(target.dataset.count, 10); // 데이터 속성에서 새 공지 개수 가져오기
+    const noticeCount = parseInt(target.dataset.count, 10); // 새 공지 개수 가져오기
 
-    // 새 공지 개수가 0이면 미리보기 표시 X
+    // 새 공지 없으면 미리보기 표시x
     if (noticeCount === 0) {
       previewArea.style.display = 'none';
       previewArea.dataset.url = ''; // URL 데이터 초기화
@@ -126,13 +119,12 @@ document.addEventListener('mouseover', async (event) => {
     // 마우스 위치에 따라 미리보기 위치 설정
     const mouseX = event.clientX;
     const mouseY = event.clientY;
-    const offsetX = 20; // 마우스 커서로부터 가로 오프셋
-    const offsetY = 20; // 마우스 커서로부터 세로 오프셋
-
-    // 미리보기 영역의 위치를 마우스 위치 기준으로 설정
+    const offsetX = 20;
+    const offsetY = 20;
     previewArea.style.left = `${mouseX + offsetX}px`;
     previewArea.style.top = `${mouseY + offsetY}px`;
 
+    // 미리보기 창 구현
     try {
       const selectedDateInput = document.getElementById('notice-date-input');
       const selectedDateString = selectedDateInput.value; // 선택된 날짜 문자열 가져오기
@@ -143,17 +135,18 @@ document.addEventListener('mouseover', async (event) => {
         filterDate.setHours(0, 0, 0, 0);
       }
 
-      // 공통 크롤링 및 필터링 함수 호출
+      // 웹 크롤링 및 필터링 함수 호출
       const filteredNotices = await crawlAndFilterNotices(boardUrl, filterDate);
 
       let previewContent = `<h3>${boardTitle}</h3><ul>`;
 
-      if (filteredNotices.length === 0) {
+      // 미리보기에 새 공지 제목 삽입
+      if (filteredNotices.length === 0) { // 해당 날짜 공지 없는 경우
         previewContent += `<li>해당하는 공지가 없습니다.</li>`;
       } else {
         // 최대 5개의 공지만 표시
         filteredNotices.slice(0, 5).forEach(notice => {
-          previewContent += `<li>${notice.title}</li>`; // 링크 제거, 제목만 표시
+          previewContent += `<li>${notice.title}</li>`;
         });
       }
       previewContent += `</ul>`;
@@ -163,34 +156,32 @@ document.addEventListener('mouseover', async (event) => {
       console.error('미리보기 내용을 가져오는 중 오류 발생:', e);
       previewArea.innerHTML = `<h3>${boardTitle}</h3><p>미리보기를 로딩할 수 없습니다.</p>`;
     }
-  }, 200); // 0.2초 지연 후 미리보기 표시
+  }, 200); // 0.2초 후 미리보기 표시
 });
 
+// 마우스가 게시판 목록 밖으로 이동했을 때
 document.addEventListener('mouseout', (event) => {
   const target = event.target.closest('.notice-item');
-  if (!target) return; // .notice-item가 아니면 종료
+  if (!target) return; // 게시판 목록 창 근처가 아닌 경우 종료
 
   clearTimeout(showPreviewTimer); // 미리보기 표시 타이머 취소
 
   // 미리보기 숨김 타이머 설정
   hidePreviewTimer = setTimeout(() => {
     previewArea.style.display = 'none';
-    previewArea.dataset.url = ''; // URL 데이터 초기화
-  }, 200); // 0.2초 지연 후 미리보기 숨김
+    previewArea.dataset.url = '';
+  }, 200);
 });
 
 // 날짜 YYYY-MM-DD 형식으로 포맷
 function formatDate(date) {
   const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 한자리일 경우 두자리로 표시
   const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-/*
-공통 크롤링 및 필터링 로직
-주어진 게시판 URL과 필터 날짜에 따라 공지를 크롤링하고 필터링
-*/
+// 게시판 URL과 필터 날짜에 따라 공지를 크롤링하고 필터링
 async function crawlAndFilterNotices(boardUrl, filterDate) {
   const filteredNotices = [];
   let page = 1;

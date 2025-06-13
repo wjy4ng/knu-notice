@@ -46,6 +46,7 @@ h1 {
   display: inline-block;
 }
 
+/* script.js에서 동적으로 생성한 게시판 목록 */
 .category-section {
   flex: 1;
   min-width: 150px;
@@ -57,7 +58,6 @@ h1 {
   gap: 20px;
 }
 
-/* script.js에서 동적으로 생성한 게시판 목록 */
 .notice-item {
   display: flex;
   justify-content: space-between;
