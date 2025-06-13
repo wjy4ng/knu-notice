@@ -1,5 +1,12 @@
+@font-face {
+  font-family: 'BMDOHYEON';
+  src: url('BMDOHYEON_ttf.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: 'BMDOHYEON', 'Noto Sans KR', sans-serif;
   background: #f5f6fa;
   margin: 0;
   padding: 0;
