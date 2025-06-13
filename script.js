@@ -173,6 +173,10 @@ async function renderNoticeList(dateString = null) {
   noticeBoardListContainer.innerHTML = '';
   gomnaruBoardListContainer.innerHTML = '';
 
+  // 로딩 메시지 표시
+  noticeBoardListContainer.innerHTML = '<p>로딩 중...</p>';
+  gomnaruBoardListContainer.innerHTML = '<p>로딩 중...</p>';
+
   // 모든 게시판 요청을 병렬 처리하고 모두 완료할 때까지 기다림.
   const allCategoryPromises = CATEGORIES.map(async category => { // ex: 공지사항, 곰나루 광장
     const fetchPromises = category.boards.map(async board => { // ex: 학생소식, 행정소식, 행사안내, 채용소식
@@ -188,6 +192,7 @@ async function renderNoticeList(dateString = null) {
   // 각 카테고리의 목록을 렌더링
   allCategoryData.forEach(categoryData => {
     const targetContainer = categoryData.categoryName === '공지사항' ? noticeBoardListContainer : gomnaruBoardListContainer;
+    targetContainer.innerHTML = ''; // Clear loading message
 
     categoryData.boardsWithCounts.forEach((board, index) => {
       const item = document.createElement('a'); // <a> 생성
