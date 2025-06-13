@@ -7,32 +7,34 @@
 
 body {
   font-family: 'BMDOHYEON', 'Noto Sans KR', sans-serif;
-  background: #f5f6fa;
+  background: #222222; /* Slightly brighter solid dark background */
   margin: 0;
   padding: 0;
 }
 .container {
-  max-width: 800px;
-  margin: 20px auto 200px auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  max-width: 1200px; /* Wider container */
+  margin: 50px auto; /* More vertical margin */
+  background: #222222; /* Slightly brighter solid dark background, same as body */
   padding: 32px 24px;
-  text-align: center;
+  display: flex; /* Enable flexbox for horizontal layout */
+  justify-content: space-between; /* Space out children */
+  align-items: stretch; /* Make children fill container height */
+  gap: 40px; /* Space between left and right sections */
+  text-align: left; /* Align text to left within container children */
 }
 #notice-link {
   display: inline-block;
   margin-top: 24px;
   font-size: 1.5rem;
-  color: #fff;
-  background: #2d8cf0;
+  color: #ffffff; /* White text for button */
+  background: #4a90e2; /* Blue button */
   padding: 12px 32px;
   border-radius: 8px;
   text-decoration: none;
   transition: background 0.2s;
 }
 #notice-link:hover {
-  background: #1a73e8;
+  background: #357bd8; /* Darker blue on hover */
 }
 #notice-count {
   font-weight: bold;
@@ -43,7 +45,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f0f4ff;
+  background: #3a3a3a; /* Darker background for notice items */
   border-radius: 8px;
   padding: 16px 20px;
   margin-bottom: 16px;
@@ -51,10 +53,9 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   text-decoration: none;
-  color: #222;
 }
 .notice-item:hover {
-  background: #dbeafe;
+  background: #4a4a4a; /* Slightly lighter on hover */
 }
 .notice-title {
   font-weight: 500;
@@ -62,41 +63,22 @@ body {
 .notice-count {
   font-weight: bold;
   font-size: 1.5rem;
-  color: #2d8cf0;
+  color: #6a9bd8; /* Accent color for notice count */
 }
 .header-with-logo {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 30px;
+  flex-direction: column; /* Stack logo and title vertically */
+  align-items: flex-start; /* Align items to the left within the left panel */
+  justify-content: space-between; /* Place h1 at top, contact-info at bottom */
+  margin-bottom: 0;
   position: relative;
-
-
-  background-image: none;
-  opacity: 1;
-}
-
-.header-with-logo::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  background-image: url('images/logo.png');
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: 120px;
-  opacity: 0.15;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-  pointer-events: none;
+  flex-basis: 350px;
+  flex-shrink: 0;
+  padding-right: 20px;
 }
 
 h1 {
-  color: #222;
   padding-bottom: 10px;
-  margin-bottom: 0;
   position: relative;
   z-index: 1;
 }
@@ -109,7 +91,10 @@ h1 {
 
 #notice-list {
   display: flex;
-  gap: 20px;
+  flex-grow: 1; /* Allow the notice list to take up remaining space */
+  flex-direction: row; /* Arrange categories horizontally */
+  flex-wrap: wrap; /* Allow wrapping if content exceeds width */
+  gap: 20px; /* Space between categories */
 }
 
 .category-section {
@@ -128,11 +113,11 @@ h1 {
   top: 20px;
   width: 90%;
   max-width: 300px;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: #2a2a2a; /* Dark background for preview area */
+  border: 1px solid #444; /* Darker border */
   border-radius: 8px;
   padding: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3); /* Darker shadow */
   z-index: 100;
   display: none;
   flex-direction: column;
@@ -143,14 +128,12 @@ h1 {
 #preview-area h3 {
   margin-top: 0;
   font-size: 1.2rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #444; /* Darker border */
   padding-bottom: 8px;
   margin-bottom: 8px;
 }
 
 #preview-area ul {
-  list-style: none;
   padding: 0;
   margin: 0;
   list-style: disc inside;
@@ -158,35 +141,28 @@ h1 {
 
 #preview-area li {
   font-size: 0.9rem;
-  color: #555;
+  color: #d0d0d0; /* Lighter text color */
   line-height: 1.6;
   margin-bottom: 5px;
   padding-left: 10px;
-  border-left: 2px solid #2d8cf0;
+  border-left: 2px solid #6a9bd8; /* Accent color for border */
 }
 
 #preview-area li:last-child {
   margin-bottom: 0;
 }
 
-.section-separator {
-  border: none;
-  height: 1px;
-  background-color: #eee;
-  margin: 30px 0;
-}
-
 .footer {
   text-align: center;
   margin-top: 40px;
   padding: 20px;
-  color: #777;
+  color: #b0b0b0; /* Lighter grey for footer text */
   font-size: 0.9rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #444; /* Darker border */
 }
 
 .footer a {
-  color: #2d8cf0;
+  color: #6a9bd8; /* Accent color for links */
   text-decoration: none;
   font-weight: bold;
   margin-left: 10px;
@@ -196,49 +172,55 @@ h1 {
   text-decoration: underline;
 }
 
-#preview-area {
-  position: fixed;
-  left: 50%;
-  top: 20px;
-  width: 90%;
-  max-width: 300px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  z-index: 100;
-  display: none;
+.contact-info {
+  text-align: left; /* Align buttons to the left */
+}
+
+.top-left-group {
+  display: flex;
   flex-direction: column;
-  gap: 5px;
-  text-align: left;
+  align-items: flex-start; /* Align content to the left */
+  gap: 15px; /* Space between h1 and filter placeholder */
 }
 
-#preview-area h3 {
-  margin-top: 0;
-  font-size: 1.2rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-  margin-bottom: 8px;
+.filter-section-placeholder {
+  height: 50px;
+  background-color: #3a3a3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e0e0e0;
+  border-radius: 8px;
+  width: 100%; /* Ensure it takes full width of its parent */
 }
 
-#preview-area ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  list-style: disc inside;
+.contact-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 12px;
+  margin: 3px;
+  border-radius: 4px;
+  background-color: #3a7bd5;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: background-color 0.2s, transform 0.2s;
+  cursor: pointer;
+  gap: 6px;
 }
 
-#preview-area li {
-  font-size: 0.9rem;
-  color: #555;
-  line-height: 1.6;
-  margin-bottom: 5px;
-  padding-left: 10px;
-  border-left: 2px solid #2d8cf0;
+.contact-button:hover {
+  background-color: #2e6cb5;
+  transform: translateY(-2px);
 }
 
-#preview-area li:last-child {
-  margin-bottom: 0;
+/* Consolidated common text colors */
+body, .notice-item, .filter-section-placeholder {
+  color: #e0e0e0;
+}
+/* Consolidated heading text colors */
+h1, #preview-area h3 {
+  color: #f0f0f0;
 } 

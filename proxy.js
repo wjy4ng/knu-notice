@@ -1,5 +1,5 @@
-const express = require('express'); // express: 서버 설정을 도와주는 모듈
-const path = require('path'); // path: 파일이나 디렉토리 경로 안전하게 처리하는 모듈
+const express = require('express');
+const path = require('path');
 const app = express();
 
 app.use(express.static(path.join(__dirname, '/'))); // 정적 파일을 제공하는 경로 설정 ex: index.html 요청 시 해당 HTML 파일 반환됨
