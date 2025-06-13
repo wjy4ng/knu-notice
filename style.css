@@ -7,14 +7,17 @@
 
 body {
   font-family: 'BMDOHYEON', 'Noto Sans KR', sans-serif;
-  background: #222222; /* Slightly brighter solid dark background */
+  background: #1a1a1a; /* Solid dark background */
+  color: #e0e0e0; /* Light text color */
   margin: 0;
   padding: 0;
 }
 .container {
   max-width: 1200px; /* Wider container */
   margin: 50px auto; /* More vertical margin */
-  background: #222222; /* Slightly brighter solid dark background, same as body */
+  background: #1a1a1a; /* Solid dark background, same as body */
+  border-radius: 0; /* Remove border-radius */
+  box-shadow: none; /* Remove box-shadow */
   padding: 32px 24px;
   display: flex; /* Enable flexbox for horizontal layout */
   justify-content: space-between; /* Space out children */
@@ -53,6 +56,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   text-decoration: none;
+  color: #e0e0e0; /* Light text color for notice items */
 }
 .notice-item:hover {
   background: #4a4a4a; /* Slightly lighter on hover */
@@ -74,11 +78,15 @@ body {
   position: relative;
   flex-basis: 350px;
   flex-shrink: 0;
+  background-image: none;
+  opacity: 1;
   padding-right: 20px;
 }
 
 h1 {
+  color: #f0f0f0; /* Brighter color for headings */
   padding-bottom: 10px;
+  margin-bottom: 0;
   position: relative;
   z-index: 1;
 }
@@ -128,12 +136,14 @@ h1 {
 #preview-area h3 {
   margin-top: 0;
   font-size: 1.2rem;
+  color: #f0f0f0; /* Light color for heading */
   border-bottom: 1px solid #444; /* Darker border */
   padding-bottom: 8px;
   margin-bottom: 8px;
 }
 
 #preview-area ul {
+  list-style: none;
   padding: 0;
   margin: 0;
   list-style: disc inside;
@@ -150,6 +160,13 @@ h1 {
 
 #preview-area li:last-child {
   margin-bottom: 0;
+}
+
+.section-separator {
+  border: none;
+  height: 1px;
+  background-color: #444; /* Darker separator */
+  margin: 30px 0;
 }
 
 .footer {
@@ -176,24 +193,6 @@ h1 {
   text-align: left; /* Align buttons to the left */
 }
 
-.top-left-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Align content to the left */
-  gap: 15px; /* Space between h1 and filter placeholder */
-}
-
-.filter-section-placeholder {
-  height: 50px;
-  background-color: #3a3a3a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #e0e0e0;
-  border-radius: 8px;
-  width: 100%; /* Ensure it takes full width of its parent */
-}
-
 .contact-button {
   display: flex;
   align-items: center;
@@ -212,15 +211,6 @@ h1 {
 }
 
 .contact-button:hover {
-  background-color: #2e6cb5;
+  background-color: #2e6cb5; /* Even darker on hover */
   transform: translateY(-2px);
-}
-
-/* Consolidated common text colors */
-body, .notice-item, .filter-section-placeholder {
-  color: #e0e0e0;
-}
-/* Consolidated heading text colors */
-h1, #preview-area h3 {
-  color: #f0f0f0;
 } 
