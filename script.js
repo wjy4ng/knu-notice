@@ -296,7 +296,7 @@ document.addEventListener('mouseover', async (event) => {
       console.error('미리보기 내용을 가져오는 중 오류 발생:', e);
       previewArea.innerHTML = `<h3>${boardTitle}</h3><p>미리보기를 로딩할 수 없습니다.</p>`;
     }
-  }, 500); // 0.5초 지연 후 미리보기 표시
+  }, 200); // 0.2초 지연 후 미리보기 표시
 });
 
 document.addEventListener('mouseout', (event) => {
