@@ -286,7 +286,7 @@ document.addEventListener('mouseover', async (event) => {
       } else {
         // 최대 5개의 공지만 표시
         filteredNotices.slice(0, 5).forEach(notice => {
-          previewContent += `<li><a href=\"${notice.url}\" target=\"_blank\">${notice.title}</a></li>`;
+          previewContent += `<li>${notice.title}</li>`; // 링크 제거, 제목만 표시
         });
       }
       previewContent += `</ul>`;

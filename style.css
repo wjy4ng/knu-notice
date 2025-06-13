@@ -7,7 +7,7 @@
 
 body {
   font-family: 'BMDOHYEON', 'Noto Sans KR', sans-serif;
-  background: #1a1a1a; /* Solid dark background */
+  background: #242424; /* Solid slightly brighter dark background */
   color: #e0e0e0; /* Light text color */
   margin: 0;
   padding: 0;
@@ -15,7 +15,7 @@ body {
 .container {
   max-width: 1200px; /* Wider container */
   margin: 50px auto; /* More vertical margin */
-  background: #1a1a1a; /* Solid dark background, same as body */
+  background: #242424; /* Solid slightly brighter dark background, same as body */
   border-radius: 0; /* Remove border-radius */
   box-shadow: none; /* Remove box-shadow */
   padding: 32px 24px;
@@ -131,12 +131,13 @@ h1 {
   flex-direction: column;
   gap: 5px;
   text-align: left;
+  color: #ffffff; /* 기본 글 색상을 흰색으로 설정 */
 }
 
 #preview-area h3 {
   margin-top: 0;
   font-size: 1.2rem;
-  color: #f0f0f0; /* Light color for heading */
+  color: #ffffff !important; /* 미리보기 제목 글 색상을 흰색으로 강제 변경 */
   border-bottom: 1px solid #444; /* Darker border */
   padding-bottom: 8px;
   margin-bottom: 8px;
@@ -151,15 +152,24 @@ h1 {
 
 #preview-area li {
   font-size: 0.9rem;
-  color: #d0d0d0; /* Lighter text color */
+  color: #ffffff; /* 미리보기 글 색상을 흰색으로 변경 */
   line-height: 1.6;
   margin-bottom: 5px;
   padding-left: 10px;
-  border-left: 2px solid #6a9bd8; /* Accent color for border */
+  border-left: 2px solid #2d8cf0;
 }
 
 #preview-area li:last-child {
   margin-bottom: 0;
+}
+
+#preview-area li a {
+  color: #ffffff; /* 미리보기 목록 링크 색상을 흰색으로 변경 */
+  text-decoration: none;
+}
+
+#preview-area li a:hover {
+  text-decoration: underline;
 }
 
 .section-separator {
@@ -210,11 +220,6 @@ h1 {
   gap: 6px;
 }
 
-<<<<<<< HEAD
-.contact-button:hover {
-  background-color: #2e6cb5; /* Even darker on hover */
-  transform: translateY(-2px);
-=======
 #preview-area ul {
   list-style: none;
   padding: 0;
@@ -224,7 +229,7 @@ h1 {
 
 #preview-area li {
   font-size: 0.9rem;
-  color: #555;
+  color: #ffffff; /* 미리보기 글 색상을 흰색으로 변경 */
   line-height: 1.6;
   margin-bottom: 5px;
   padding-left: 10px;
@@ -264,17 +269,15 @@ h1 {
 }
 
 .date-filter-container {
-  margin-bottom: 20px;
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 .date-filter-container label {
-  font-size: 1.1rem;
+  color: #ffffff; /* 날짜 선택 레이블을 흰색으로 변경 */
   font-weight: bold;
-  color: #333;
 }
 
 .date-filter-container input[type="date"] {
@@ -289,5 +292,4 @@ h1 {
 
 .date-filter-container input[type="date"]:focus {
   border-color: #2d8cf0;
->>>>>>> feature-filter
 } 
