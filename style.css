@@ -85,6 +85,9 @@ body {
 
 h1 {
   color: #f0f0f0; /* Brighter color for headings */
+  font-size: 2.8rem; /* 폰트 크기 키움 */
+  font-weight: 800; /* 폰트 굵기 더 두껍게 */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); /* 미묘한 그림자 추가 */
   padding-bottom: 10px;
   margin-bottom: 0;
   position: relative;
