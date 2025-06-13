@@ -322,6 +322,9 @@ async function renderNoticeList(dateString = null) {
         <span class="notice-title">${board.name}</span>
         <span class="notice-count">${board.count}</span>  
       `;
+      if (board.count === 0) {
+        item.classList.add('inactive-notice-item');
+      }
       item.style.opacity = '0'; // 초기에는 보이지 않도록 설정 (애니메이션 적용)
       targetContainer.appendChild(item); // DOM 컨테이너에 추가
 

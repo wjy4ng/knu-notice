@@ -27,7 +27,35 @@ body {
   transition: background-color 0.5s ease;
 }
 
-/* script.js에서 동적으로 생성한 공지 목록 */
+/* 웹 이름 */
+h1 {
+  color: #95c1ff;
+  font-size: 2.8rem;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  padding-bottom: 10px;
+  position: relative;
+  transition: color 0.5s ease;
+}
+
+.section-separator {
+  border: none;
+  border-top: 1px solid #555;
+  transition: border-top-color 0.5s ease;
+}
+
+.category-section {
+  flex: 1;
+  min-width: 150px;
+}
+
+#notice-list {
+  display: flex;
+  flex-grow: 1;
+  gap: 20px;
+}
+
+/* script.js에서 동적으로 생성한 게시판 목록 */
 .notice-item {
   display: flex;
   justify-content: space-between;
@@ -54,27 +82,21 @@ body {
   color: #2d8cf0;
 }
 
-h1 {
-  color: #95c1ff;
-  font-size: 2.8rem;
-  font-weight: 800;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  padding-bottom: 10px;
-  position: relative;
-  transition: color 0.5s ease;
+/* 오늘 올라온 공지가 아닌 게시판 */
+.notice-item.inactive-notice-item {
+  background: #202020;
+}
+.notice-item.inactive-notice-item:hover {
+  background: #252525;
+}
+.notice-item.inactive-notice-item .notice-count {
+  color: #1c467a;
+}
+.notice-item.inactive-notice-item .notice-title {
+  color: #666666;
 }
 
-#notice-list {
-  display: flex;
-  flex-grow: 1;
-  gap: 20px;
-}
-
-.category-section {
-  flex: 1;
-  min-width: 150px;
-}
-
+/* 게시판 목록 렌더링 애니메이션 */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -128,49 +150,7 @@ h1 {
   transition: color 0.5s ease, border-left-color 0.5s ease;
 }
 
-.section-separator {
-  border: none;
-  border-top: 1px solid #555;
-  transition: border-top-color 0.5s ease;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 30px;
-  padding: 10px;
-  color: #c0c0c0;
-  font-size: 0.9rem;
-  border-top: 1px solid #555;
-  transition: color 0.5s ease, border-top-color 0.5s ease;
-}
-
-.contact-info {
-  margin-top: 280px;
-  text-align: left;
-}
-
-.contact-button {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 6px 12px;
-  margin: 3px;
-  margin-right: 100px;
-  border-radius: 4px;
-  background-color: #2d8cf0;
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: background-color 0.2s, transform 0.2s, color 0.5s ease;
-  cursor: pointer;
-  gap: 6px;
-}
-
-.contact-button:hover {
-  background-color: #3a7bd5;
-  transform: scale(1.05);
-}
-
+/* 날짜 필터 부분 */
 .date-filter-container {
   display: flex;
   align-items: center;
@@ -202,4 +182,43 @@ h1 {
 .date-filter-container input[type="date"]:focus {
   border-color: #88c0d0;
   box-shadow: 0 0 0 3px rgba(136, 192, 208, 0.4);
+}
+
+/* 정보 링크 부분 */
+.contact-info {
+  margin-top: 280px;
+  text-align: left;
+}
+
+.contact-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 12px;
+  margin: 3px;
+  margin-right: 100px;
+  border-radius: 4px;
+  background-color: #2d8cf0;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: background-color 0.2s, transform 0.2s, color 0.5s ease;
+  cursor: pointer;
+  gap: 6px;
+}
+
+.contact-button:hover {
+  background-color: #3a7bd5;
+  transform: scale(1.05);
+}
+
+/* 저작권 표시 */
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  padding: 10px;
+  color: #c0c0c0;
+  font-size: 0.9rem;
+  border-top: 1px solid #555;
+  transition: color 0.5s ease, border-top-color 0.5s ease;
 }
