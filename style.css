@@ -210,7 +210,84 @@ h1 {
   gap: 6px;
 }
 
+<<<<<<< HEAD
 .contact-button:hover {
   background-color: #2e6cb5; /* Even darker on hover */
   transform: translateY(-2px);
+=======
+#preview-area ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  list-style: disc inside;
+}
+
+#preview-area li {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 5px;
+  padding-left: 10px;
+  border-left: 2px solid #2d8cf0;
+}
+
+#preview-area li:last-child {
+  margin-bottom: 0;
+}
+
+.filter-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 10px; /* 버튼 사이 간격 */
+}
+
+.filter-button {
+  background-color: #f0f4ff;
+  color: #2d8cf0;
+  border: 1px solid #2d8cf0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+  background-color: #e0eaff;
+}
+
+.filter-button.active {
+  background-color: #2d8cf0;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.date-filter-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter-container label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.date-filter-container input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #555;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.date-filter-container input[type="date"]:focus {
+  border-color: #2d8cf0;
+>>>>>>> feature-filter
 } 

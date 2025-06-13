@@ -61,6 +61,78 @@ const CATEGORIES = [
   },
 ];
 
+// 날짜를 YYYY-MM-DD 형식으로 포맷하는 헬퍼 함수
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/*
+공통 크롤링 및 필터링 로직
+주어진 게시판 URL과 필터 날짜에 따라 공지를 크롤링하고 필터링
+*/
+async function crawlAndFilterNotices(boardUrl, filterDate) {
+  const filteredNotices = [];
+  let page = 1;
+
+  while (true) {
+    try {
+      const pageUrl = page === 1 ? boardUrl : `${boardUrl}?page=${page}`;
+      const proxyUrl = `/proxy?url=${encodeURIComponent(pageUrl)}`;
+      const res = await fetch(proxyUrl);
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const noticeRows = doc.querySelectorAll('tr:not(.notice)');
+
+      if (noticeRows.length === 0) {
+        break; // 더 이상 공지가 없으면 중단
+      }
+
+      let stopCrawling = false;
+
+      for (const row of noticeRows) {
+        const dateCell = row.querySelector('.td-date');
+        const titleElement = row.querySelector('td a');
+
+        if (!dateCell || !titleElement) continue;
+
+        let dateStr = dateCell.textContent.trim();
+        dateStr = dateStr.replace(/\./g, '-');
+        const noticeDate = new Date(dateStr);
+        noticeDate.setHours(0, 0, 0, 0);
+
+        // Stop condition: 공지 날짜가 지정된 날짜보다 이전이면 중단
+        if (noticeDate < filterDate) {
+          stopCrawling = true;
+          break; // 현재 페이지 처리 중단
+        }
+
+        // 날짜 일치 여부 비교
+        if (noticeDate.getFullYear() === filterDate.getFullYear() &&
+            noticeDate.getMonth() === filterDate.getMonth() &&
+            noticeDate.getDate() === filterDate.getDate()) {
+          filteredNotices.push({ title: titleElement.textContent.trim(), url: titleElement.href });
+        }
+      }
+
+      if (stopCrawling) {
+        break; // 전체 루프 중단
+      }
+
+      page++; // 다음 페이지로 이동
+
+    } catch (e) {
+      console.error(`Error crawling page ${page} for ${boardUrl}:`, e);
+      break; // 에러 발생 시 중단
+    }
+  }
+  return filteredNotices;
+}
+
 /*
 
 각 게시판 별 공지를 fetch하여 가져오는 함수
@@ -70,38 +142,18 @@ const CATEGORIES = [
 4. 날짜 형식 포맷 후, 오늘 올라온 공지 갯수 카운팅
 
 */
-async function fetchNoticeCount(board) {
-  try {
-    const proxyUrl = `/proxy?url=${encodeURIComponent(board.url)}`; // url을 인코딩하여 파라미터로 변환시켜 백엔드 /proxy에 외부 url을 담음.
-    const res = await fetch(proxyUrl); // 외부사이트인 proxyUrl로 요청을 보냄
-    const html = await res.text(); // 응답을 html 문자열로 받아옴
-    
-    console.log(`==== ${board.name} HTML ====`); // 디버깅
-    // console.log(html);
+async function fetchNoticeCount(board, targetDateStr = null) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // 오늘 날짜의 시간을 0으로 설정
 
-    const parser = new DOMParser(); // html 문자열을 파싱하기 위한 객체 생성
-    const doc = parser.parseFromString(html, 'text/html'); // html 문자열을 HTML 문서로 변환
-    const dateCells = doc.querySelectorAll('tr:not(.notice) td.td-date'); // 공지사항 고정 게시글의 class인 notice를 제외한 일반글의 날짜셀을 모두 선택
-    const now = new Date();
-    let count = 0;
-
-    dateCells.forEach(cell => { // 선택된 날짜셀들을 하나씩 반복
-      let dateStr = cell.textContent.trim(); // 날짜 추출 ex: "2025.05.30"
-      dateStr = dateStr.replace(/\./g, '-'); // 날짜의 모든 .을 -로 변환 ex: "2025-05-30"
-      const noticeDate = new Date(dateStr); // 날짜 문자열을 Date 객체로 변환
-      if ( // 오늘 올라온 공지 갯수 카운트
-        noticeDate.getFullYear() === now.getFullYear() &&
-        noticeDate.getMonth() === now.getMonth() &&
-        noticeDate.getDate() === now.getDate()
-      ) {
-        count++;
-      }
-    });
-
-    return count; // 개수 반환
-  } catch (e) {
-    return 0; // 에러 발생 시 0 반환
+  let filterDate = today; // 기본값은 오늘
+  if (targetDateStr) {
+    filterDate = new Date(targetDateStr);
+    filterDate.setHours(0, 0, 0, 0);
   }
+
+  const notices = await crawlAndFilterNotices(board.url, filterDate);
+  return notices.length; // 개수 반환
 }
 
 /*
@@ -112,7 +164,7 @@ async function fetchNoticeCount(board) {
 3. 띄울 때 애니메이션 적용
 
 */
-async function renderNoticeList() {
+async function renderNoticeList(dateString = null) {
   // 공지사항과 곰나루광장의 게시판 목록 요소 찾기
   const noticeBoardListContainer = document.querySelector('#notice-category-section .board-list');
   const gomnaruBoardListContainer = document.querySelector('#gomnaru-category-section .board-list');
@@ -124,7 +176,7 @@ async function renderNoticeList() {
   // 모든 게시판 요청을 병렬 처리하고 모두 완료할 때까지 기다림.
   const allCategoryPromises = CATEGORIES.map(async category => { // ex: 공지사항, 곰나루 광장
     const fetchPromises = category.boards.map(async board => { // ex: 학생소식, 행정소식, 행사안내, 채용소식
-      const noticeCount = await fetchNoticeCount(board); // 각 게시판의 당일 공지 카운트
+      const noticeCount = await fetchNoticeCount(board, dateString); // 각 게시판의 공지 카운트. dateString 전달
       return { ...board, count: noticeCount }; // 원래 board 객체에 count 속성 추가해서 반환
     });
     const boardsWithDetails = await Promise.all(fetchPromises); 
@@ -215,81 +267,71 @@ document.addEventListener('mouseover', async (event) => {
     previewArea.style.top = `${mouseY + offsetY}px`;
 
     try {
-      const proxyUrl = `/proxy?url=${encodeURIComponent(boardUrl)}`;
-      const res = await fetch(proxyUrl);
-      const html = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+      const selectedDateInput = document.getElementById('notice-date-input');
+      const selectedDateString = selectedDateInput.value; // 선택된 날짜 문자열 가져오기
 
-      // 공지 목록을 파싱하고 오늘 날짜 공지만 필터링
-      const noticeRows = doc.querySelectorAll('tr:not(.notice)'); // 고정 공지 제외
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // 날짜만 비교하기 위해 시간을 초기화 
+      let filterDate = new Date(); // 기본값은 오늘
+      if (selectedDateString) {
+        filterDate = new Date(selectedDateString);
+        filterDate.setHours(0, 0, 0, 0);
+      }
 
-      const todayNotices = []; // 오늘 날짜 공지 미리보기 목록
-
-      noticeRows.forEach(row => {
-        const dateCell = row.querySelector('.td-date'); // 공지 날짜 추출
-        const titleElement = row.querySelector('td a'); // 제목 링크 추출
-
-        if (dateCell && titleElement) {
-          let dateStr = dateCell.textContent.trim();
-          // 날짜 형식을 yyyy-mm-dd로 변환
-          dateStr = dateStr.replace(/\./g, '-');
-          const noticeDate = new Date(dateStr);
-
-          // 날짜만 비교
-          if (noticeDate.getFullYear() === today.getFullYear() &&
-              noticeDate.getMonth() === today.getMonth() &&
-              noticeDate.getDate() === today.getDate()) {
-            todayNotices.push({ title: titleElement.textContent.trim(), url: titleElement.href });
-          }
-        }
-      });
+      // 공통 크롤링 및 필터링 함수 호출
+      const filteredNotices = await crawlAndFilterNotices(boardUrl, filterDate);
 
       let previewContent = `<h3>${boardTitle}</h3><ul>`;
-      const maxPreviews = 5; // 미리보기 최대 5개만 표시
 
-      // 미리보기 갯수가 5개보다 많으면 5개만 표시
-      for (let i = 0; i < Math.min(todayNotices.length, maxPreviews); i++) {
-        const notice = todayNotices[i];
-        previewContent += `<li>${notice.title}</li>`;
+      if (filteredNotices.length === 0) {
+        previewContent += `<li>해당하는 공지가 없습니다.</li>`;
+      } else {
+        // 최대 5개의 공지만 표시
+        filteredNotices.slice(0, 5).forEach(notice => {
+          previewContent += `<li><a href=\"${notice.url}\" target=\"_blank\">${notice.title}</a></li>`;
+        });
       }
-      previewContent += '</ul>';
+      previewContent += `</ul>`;
       previewArea.innerHTML = previewContent;
+
     } catch (e) {
-      previewArea.innerHTML = `<h3>${boardTitle}</h3><p>미리보기를 불러올 수 없습니다.</p>`;
-      console.error('Failed to fetch preview:', e);
+      console.error('미리보기 내용을 가져오는 중 오류 발생:', e);
+      previewArea.innerHTML = `<h3>${boardTitle}</h3><p>미리보기를 로딩할 수 없습니다.</p>`;
     }
-  }, 500); // 미리보기가 0.5초 뒤에 나오도록 표시 (오류 방지)
+  }, 500); // 0.5초 지연 후 미리보기 표시
 });
 
-// 마우스가 게시판 영역 밖으로 나갔을 때 미리보기 숨김
 document.addEventListener('mouseout', (event) => {
   const target = event.target.closest('.notice-item');
-  const relatedTarget = event.relatedTarget; // 마우스가 향하고 있는 새로운 요소
-  const isLeavingToPreview = previewArea.contains(relatedTarget) || relatedTarget === previewArea; // 마우스가 영역에 있으면 True, 벗어나면 False
+  if (!target) return; // .notice-item가 아니면 종료
 
-  if (target && !isLeavingToPreview) { // 마우스가 영역 밖으로 이동했을 때
-    clearTimeout(showPreviewTimer); // 띄우려고 대기 중인 타이머가 있다면 초기화
-    // 미리보기 숨김 타이머 설정
-    hidePreviewTimer = setTimeout(() => {
-      previewArea.style.display = 'none';
-      previewArea.dataset.url = ''; // URL 데이터 초기화
-    }, 50); // 0.05초
-  }
-});
+  clearTimeout(showPreviewTimer); // 미리보기 표시 타이머 취소
 
-// 마우스가 영역 밖으로 나가면
-previewArea.addEventListener('mouseleave', () => {
   // 미리보기 숨김 타이머 설정
   hidePreviewTimer = setTimeout(() => {
     previewArea.style.display = 'none';
     previewArea.dataset.url = ''; // URL 데이터 초기화
-  }, 50); // 0.05초
+  }, 200); // 0.2초 지연 후 미리보기 숨김
 });
 
-// 문서의 모든 요소가 load 되었을 때, 즉 DOM이 완성되었을 때
+// 초기 렌더링 및 날짜 입력 필드 설정
 document.addEventListener('DOMContentLoaded', () => {
-  renderNoticeList(); // 화면에 공지사항 표시
+  const noticeDateInput = document.getElementById('notice-date-input');
+  const today = new Date();
+
+  // 오늘 날짜를 YYYY-MM-DD 형식으로 포맷
+  const todayFormatted = formatDate(today);
+  
+  // 7일 전 날짜 계산
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const sevenDaysAgoFormatted = formatDate(sevenDaysAgo);
+
+  noticeDateInput.value = todayFormatted; // 기본값은 오늘 날짜
+  noticeDateInput.max = todayFormatted; // 최대 선택 가능 날짜를 오늘로 설정
+  noticeDateInput.min = sevenDaysAgoFormatted; // 최소 선택 가능 날짜를 7일 전으로 설정
+
+  renderNoticeList(todayFormatted); // 페이지 로드 시 기본값으로 오늘 공지사항 렌더링
+
+  noticeDateInput.addEventListener('change', (event) => {
+    renderNoticeList(event.target.value); // 선택된 날짜로 공지사항 렌더링
+  });
 });
