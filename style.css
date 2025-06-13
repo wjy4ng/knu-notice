@@ -198,7 +198,7 @@ h1 {
   margin: 3px;
   margin-right: 100px;
   border-radius: 4px;
-  background-color: #2d8cf0;
+  background: linear-gradient(to right, #2d8cf0, #3e6db0);
   color: #ffffff;
   text-decoration: none;
   font-size: 0.85rem;
