@@ -190,34 +190,35 @@ async function crawlAndFilterNotices(boardUrl, filterDate) {
     try {
       const pageUrl = page === 1 ? boardUrl : `${boardUrl}?page=${page}`;
       const proxyUrl = `/proxy?url=${encodeURIComponent(pageUrl)}`;
-      const res = await fetch(proxyUrl);
-      const html = await res.text();
+      const res = await fetch(proxyUrl); // 크롤링할 사이트 url을 proxy.js에게 전달
+      const html = await res.text(); // proxy.js 서버로부터 응답
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      const noticeRows = doc.querySelectorAll('tr:not(.notice)');
+      const noticeRows = doc.querySelectorAll('tr:not(.notice)'); // 고정된 공지가 아닌 행 추출
 
+      // 공지가 없으면 중단
       if (noticeRows.length === 0) {
-        break; // 더 이상 공지가 없으면 중단
+        break;
       }
 
       let stopCrawling = false;
 
       for (const row of noticeRows) {
-        const dateCell = row.querySelector('.td-date');
-        const titleElement = row.querySelector('td a');
+        const dateCell = row.querySelector('.td-date'); // 게시글 날짜 가져오기
+        const titleElement = row.querySelector('td a'); // 게시글 제목 가져오기
 
         if (!dateCell || !titleElement) continue;
 
-        let dateStr = dateCell.textContent.trim();
-        dateStr = dateStr.replace(/\./g, '-');
+        let dateStr = dateCell.textContent.trim(); // 날짜를 String으로
+        dateStr = dateStr.replace(/\./g, '-'); // YYYY.MM.DD -> YYYY-MM-DD 형식으로
         const noticeDate = new Date(dateStr);
         noticeDate.setHours(0, 0, 0, 0);
 
-        // Stop condition: 공지 날짜가 지정된 날짜보다 이전이면 중단
+        // 공지 날짜가 지정된 날짜보다 이전이면 중단
         if (noticeDate < filterDate) {
           stopCrawling = true;
-          break; // 현재 페이지 처리 중단
+          break;
         }
 
         // 날짜 일치 여부 비교
@@ -228,35 +229,28 @@ async function crawlAndFilterNotices(boardUrl, filterDate) {
         }
       }
 
+      // 지정한 날짜가 페이지에 없으면 나가기
       if (stopCrawling) {
-        break; // 전체 루프 중단
+        break;
       }
 
       page++; // 다음 페이지로 이동
 
     } catch (e) {
-      console.error(`Error crawling page ${page} for ${boardUrl}:`, e);
-      break; // 에러 발생 시 중단
+      console.error("Crawling Error", e);
+      break;
     }
   }
   return filteredNotices;
 }
 
-/*
-
-각 게시판 별 공지를 fetch하여 가져오는 함수
-1. 학교 홈페이지 공지사항 url을 웹 크롤링
-2. html 문자열을 파싱하여 문서로 전환
-3. html 문서에서 날짜를 추출
-4. 날짜 형식 포맷 후, 오늘 올라온 공지 갯수 카운팅
-
-*/
+// 선택한 날짜의 공지 갯수 카운팅하는 함수
 async function fetchNoticeCount(board, targetDateStr = null) {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // 오늘 날짜의 시간을 0으로 설정
+  today.setHours(0, 0, 0, 0);
 
   let filterDate = today; // 기본값은 오늘
-  if (targetDateStr) {
+  if (targetDateStr) { // 날짜 선택 시
     filterDate = new Date(targetDateStr);
     filterDate.setHours(0, 0, 0, 0);
   }
@@ -265,31 +259,20 @@ async function fetchNoticeCount(board, targetDateStr = null) {
   return notices.length; // 개수 반환
 }
 
-/*
-
-여러 게시판의 공지사항 개수를 가져와서 웹 페이지에 동적으로 렌더링하는 함수
-1. 공지사항와 곰나루광장의 새 공지 갯수를 입력
-2. 각 카테고리에 렌더링
-3. 띄울 때 애니메이션 적용
-
-*/
+// 여러 게시판의 공지사항 개수를 가져와서 웹 페이지에 동적으로 렌더링하는 함수
 async function renderNoticeList(dateString = null) {
   // 공지사항과 곰나루광장의 게시판 목록 요소 찾기
   const noticeBoardListContainer = document.querySelector('#notice-category-section .board-list');
   const gomnaruBoardListContainer = document.querySelector('#gomnaru-category-section .board-list');
 
-  // 기존 목록 항목들을 초기화
-  noticeBoardListContainer.innerHTML = '';
-  gomnaruBoardListContainer.innerHTML = '';
-
   // 로딩 메시지 표시
   noticeBoardListContainer.innerHTML = '<p>로딩 중...</p>';
   gomnaruBoardListContainer.innerHTML = '<p>로딩 중...</p>';
-
+ 
   // 모든 게시판 요청을 병렬 처리하고 모두 완료할 때까지 기다림.
-  const allCategoryPromises = CATEGORIES.map(async category => { // ex: 공지사항, 곰나루 광장
-    const fetchPromises = category.boards.map(async board => { // ex: 학생소식, 행정소식, 행사안내, 채용소식
-      const noticeCount = await fetchNoticeCount(board, dateString); // 각 게시판의 공지 카운트. dateString 전달
+  const allCategoryPromises = CATEGORIES.map(async category => { // category: 공지사항, 곰나루 광장
+    const fetchPromises = category.boards.map(async board => { // board: 학생소식, 행정소식 등
+      const noticeCount = await fetchNoticeCount(board, dateString); // noticeCount: 각 게시판 공지 갯수
       return { ...board, count: noticeCount }; // 원래 board 객체에 count 속성 추가해서 반환
     });
     const boardsWithDetails = await Promise.all(fetchPromises); 
@@ -301,7 +284,7 @@ async function renderNoticeList(dateString = null) {
   // 각 카테고리의 목록을 렌더링
   allCategoryData.forEach(categoryData => {
     const targetContainer = categoryData.categoryName === '공지사항' ? noticeBoardListContainer : gomnaruBoardListContainer;
-    targetContainer.innerHTML = ''; // Clear loading message
+    targetContainer.innerHTML = '';
 
     categoryData.boardsWithCounts.forEach((board, index) => {
       const item = document.createElement('a'); // <a> 생성
@@ -313,10 +296,11 @@ async function renderNoticeList(dateString = null) {
         <span class="notice-title">${board.name}</span>
         <span class="notice-count">${board.count}</span>  
       `;
+      // 오늘 올라온 공지가 없는 경우 따로 CSS 처리하기 위함
       if (board.count === 0) {
         item.classList.add('inactive-notice-item');
       }
-      item.style.opacity = '0'; // 초기에는 보이지 않도록 설정 (애니메이션 적용)
+      item.style.opacity = '0'; // 애니메이션을 위해 초기에 보이지 않도록 설정
       targetContainer.appendChild(item); // DOM 컨테이너에 추가
 
       // fadeIn 애니메이션 실행
