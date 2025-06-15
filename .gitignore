@@ -1,0 +1,7 @@
+# macOS 불필요 파일 무시
+.DS_Store
+
+# Node.js 의존성 폴더 무시
+node_modules/
+.DS_Store
+node_modules/
