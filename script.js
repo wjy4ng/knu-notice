@@ -141,9 +141,7 @@ document.addEventListener('mouseover', async (event) => {
       let previewContent = `<h3>${boardTitle}</h3><ul>`;
 
       // 미리보기에 새 공지 제목 삽입
-      if (filteredNotices.length === 0) { // 해당 날짜 공지 없는 경우
-        previewContent += `<li>해당하는 공지가 없습니다.</li>`;
-      } else {
+      if (filteredNotices.length !== 0) {
         // 최대 5개의 공지만 표시
         filteredNotices.slice(0, 5).forEach(notice => {
           previewContent += `<li>${notice.title}</li>`;
