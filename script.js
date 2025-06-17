@@ -1,69 +1,21 @@
-const CATEGORIES = [
-  {
-    name: '공지사항',
-    boards: [
-      {
-        name: '학생소식',
-        url: 'https://www.kongju.ac.kr/KNU/16909/subview.do',
-      },
-      {
-        name: '행정소식',
-        url: 'https://www.kongju.ac.kr/KNU/16910/subview.do',
-      },
-      {
-        name: '행사안내',
-        url: 'https://www.kongju.ac.kr/KNU/16911/subview.do',
-      },
-      {
-        name: '채용소식',
-        url: 'https://www.kongju.ac.kr/KNU/16917/subview.do',
-      },
-    ],
-  },
-  {
-    name: '곰나루광장',
-    boards: [
-      {
-        name: '열린광장',
-        url: 'https://www.kongju.ac.kr/KNU/16921/subview.do',
-      },
-      {
-        name: '신문방송사',
-        url: 'https://www.kongju.ac.kr/KNU/16922/subview.do',
-      },
-      {
-        name: '스터디/모임',
-        url: 'https://www.kongju.ac.kr/KNU/16923/subview.do',
-      },
-      {
-        name: '분실물센터',
-        url: 'https://www.kongju.ac.kr/KNU/16924/subview.do',
-      },
-      {
-        name: '사고팔고',
-        url: 'https://www.kongju.ac.kr/KNU/16925/subview.do',
-      },
-      {
-        name: '자취하숙',
-        url: 'https://www.kongju.ac.kr/KNU/16926/subview.do',
-      },
-      {
-        name: '아르바이트',
-        url: 'https://www.kongju.ac.kr/KNU/16927/subview.do',
-      },
-    ],
-  },
-];
-
 // 미리보기 기능 변수 선언
 const previewArea = document.getElementById('preview-area');
 let showPreviewTimer;
 let hidePreviewTimer;
 
 // 초기 렌더링 및 날짜 입력 필드 설정
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const noticeDateInput = document.getElementById('notice-date-input');
   const today = new Date();
+
+  try {
+    const response = await fetch('/api/categories');
+    window.CATEGORIES = await response.json(); // 전역 변수로 저장하거나 필요한 스코프에 할당
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    // 카테고리 로딩 실패 시 사용자에게 알리거나 대체 로직 수행
+    return;
+  }
 
   // 오늘 날짜를 YYYY-MM-DD 형식으로 포맷
   const todayFormatted = formatDate(today);
@@ -181,69 +133,34 @@ function formatDate(date) {
 
 // 게시판 URL과 필터 날짜에 따라 공지를 크롤링하고 필터링
 async function crawlAndFilterNotices(boardUrl, filterDate) {
+  console.log('crawlAndFilterNotices called for boardUrl:', boardUrl, 'filterDate:', filterDate);
   const filteredNotices = [];
-  let page = 1;
+  const filterDateFormatted = formatDate(filterDate); // YYYY-MM-DD 형식으로 변환
 
-  while (true) {
-    try {
-      const pageUrl = page === 1 ? boardUrl : `${boardUrl}?page=${page}`;
-      const proxyUrl = `/proxy?url=${encodeURIComponent(pageUrl)}`;
-      const res = await fetch(proxyUrl); // 크롤링할 사이트 url을 proxy.js에게 전달
-      const html = await res.text(); // proxy.js 서버로부터 응답
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+  try {
+    console.log('Attempting to fetch from /api/notices with URL:', `/api/notices?date=${filterDateFormatted}`);
+    const response = await fetch(`/api/notices?date=${filterDateFormatted}`);
+    const data = await response.json();
+    console.log('Received data from /api/notices:', data);
 
-      const noticeRows = doc.querySelectorAll('tr:not(.notice)'); // 고정된 공지가 아닌 행 추출
-
-      // 공지가 없으면 중단
-      if (noticeRows.length === 0) {
-        break;
+    // boardUrl과 일치하는 공지사항만 필터링
+    // proxy.js에서 가져온 데이터는 이미 해당 날짜로 필터링되어 있으므로, boardUrl만 필터링합니다.
+    for (const notice of data) {
+      // boardUrl이 notice.url의 시작 부분과 일치하는지 확인 (전체 URL이 아니라 게시판 URL로만 비교)
+      if (notice.url.startsWith(boardUrl)) {
+        filteredNotices.push({ title: notice.title, url: notice.url });
       }
-
-      let stopCrawling = false;
-
-      for (const row of noticeRows) {
-        const dateCell = row.querySelector('.td-date'); // 게시글 날짜 가져오기
-        const titleElement = row.querySelector('td a'); // 게시글 제목 가져오기
-
-        if (!dateCell || !titleElement) continue;
-
-        let dateStr = dateCell.textContent.trim(); // 날짜를 String으로
-        dateStr = dateStr.replace(/\./g, '-'); // YYYY.MM.DD -> YYYY-MM-DD 형식으로
-        const noticeDate = new Date(dateStr);
-        noticeDate.setHours(0, 0, 0, 0);
-
-        // 공지 날짜가 지정된 날짜보다 이전이면 중단
-        if (noticeDate < filterDate) {
-          stopCrawling = true;
-          break;
-        }
-
-        // 날짜 일치 여부 비교
-        if (noticeDate.getFullYear() === filterDate.getFullYear() &&
-            noticeDate.getMonth() === filterDate.getMonth() &&
-            noticeDate.getDate() === filterDate.getDate()) {
-          filteredNotices.push({ title: titleElement.textContent.trim(), url: titleElement.href });
-        }
-      }
-
-      // 지정한 날짜가 페이지에 없으면 나가기
-      if (stopCrawling) {
-        break;
-      }
-
-      page++; // 다음 페이지로 이동
-
-    } catch (e) {
-      console.error("Crawling Error", e);
-      break;
     }
+
+  } catch (e) {
+    console.error("Error fetching cached notices:", e);
   }
   return filteredNotices;
 }
 
 // 선택한 날짜의 공지 갯수 카운팅하는 함수
 async function fetchNoticeCount(board, targetDateStr = null) {
+  console.log('fetchNoticeCount called for board:', board.name, 'url:', board.url, 'targetDateStr:', targetDateStr);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -254,11 +171,13 @@ async function fetchNoticeCount(board, targetDateStr = null) {
   }
 
   const notices = await crawlAndFilterNotices(board.url, filterDate);
+  console.log('Notices count for', board.name, ':', notices.length);
   return notices.length; // 개수 반환
 }
 
 // 여러 게시판의 공지사항 개수를 가져와서 웹 페이지에 동적으로 렌더링하는 함수
 async function renderNoticeList(dateString = null) {
+  console.log('renderNoticeList called with dateString:', dateString);
   // 공지사항과 곰나루광장의 게시판 목록 요소 찾기
   const noticeBoardListContainer = document.querySelector('#notice-category-section .board-list');
   const gomnaruBoardListContainer = document.querySelector('#gomnaru-category-section .board-list');
@@ -268,8 +187,9 @@ async function renderNoticeList(dateString = null) {
   gomnaruBoardListContainer.innerHTML = '<p>로딩 중...</p>';
  
   // 모든 게시판 요청을 병렬 처리하고 모두 완료할 때까지 기다림.
-  const allCategoryPromises = CATEGORIES.map(async category => { // category: 공지사항, 곰나루 광장
+  const allCategoryPromises = window.CATEGORIES.map(async category => { // category: 공지사항, 곰나루 광장
     const fetchPromises = category.boards.map(async board => { // board: 학생소식, 행정소식 등
+      console.log('Calling fetchNoticeCount for board:', board.name, 'url:', board.url);
       const noticeCount = await fetchNoticeCount(board, dateString); // noticeCount: 각 게시판 공지 갯수
       return { ...board, count: noticeCount }; // 원래 board 객체에 count 속성 추가해서 반환
     });
