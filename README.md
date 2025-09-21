@@ -4,7 +4,7 @@
 - 25년 1학기 웹프로그래밍 학기말 과제
 
 ## 📌 미리보기 (Preview)
-<img width="1463" height="719" alt="Image" src="https://github.com/user-attachments/assets/97a98e32-c54c-4468-9374-2c161d5a99f1" />
+![Image](https://github.com/user-attachments/assets/74b7a7db-83b0-4b33-82a3-d1b3a00d0e90)
 
 ## 📌 기술 스택 (Tech Stack)
 - HTML
